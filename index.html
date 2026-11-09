@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NYC Income Inequality by Census Block Group | Matthew (Matt) Wiecha</title>
+  <meta name="description" content="Matthew (Matt) Wiecha analyzes income, demographics, and housing across 5,852 New York City census block groups using Python, pandas, and statistical visualization.">
+  <meta name="author" content="Matthew Wiecha">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://matthewwiecha.github.io/matthewwiecha1/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="NYC Income Inequality by Census Block Group | Matthew Wiecha">
+  <meta property="og:description" content="Exploring household income and demographic variation across 5,852 NYC census block groups.">
+  <meta property="og:url" content="https://matthewwiecha.github.io/matthewwiecha1/">
+  <style>
+    :root { --ink:#152535; --muted:#5a6b78; --line:#d9e2e7; --accent:#176b80; --bg:#f5f8f9; --paper:#fff; }
+    * {box-sizing:border-box}
+    html {scroll-behavior:smooth}
+    body {margin:0; background:var(--bg); color:var(--ink); font:17px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+    a {color:#09627b;text-underline-offset:3px}
+    a:hover {color:#043d50}
+    .wrap {max-width:1030px;margin:auto;padding:0 28px}
+    .top {background:var(--ink);color:#fff}
+    .nav {display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 0;flex-wrap:wrap}
+    .brand {color:#fff;text-decoration:none;font-size:15px;font-weight:700;letter-spacing:.02em}
+    .navlinks {display:flex;gap:22px;flex-wrap:wrap}
+    .navlinks a {color:#dceaf0;text-decoration:none;font-size:14px}
+    .hero {padding:72px 0 82px}
+    .eyebrow {text-transform:uppercase;letter-spacing:.17em;font-size:12px;font-weight:750;color:#87c9d9}
+    h1 {font-size:clamp(36px,6vw,64px);line-height:1.12;letter-spacing:-.035em;max-width:900px;margin:17px 0 22px}
+    .lede {font-size:20px;max-width:760px;color:#d5e3ea;line-height:1.6}
+    .byline {color:#c2d3dd;font-size:15px;margin-top:27px}
+    .hero a {color:#c7f0fa}
+    .buttons {display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+    .button {display:inline-block;padding:10px 18px;border-radius:5px;border:1px solid #8cc9d8;color:#fff!important;text-decoration:none;font-size:14px;font-weight:650}
+    .button.primary {background:#d3f0f4;border-color:#d3f0f4;color:#153240!important}
+    main {padding-top:42px;padding-bottom:60px}
+    .stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:48px}
+    .stat {background:#fff;border:1px solid var(--line);border-radius:9px;padding:24px 22px}
+    .stat strong {display:block;font-size:clamp(26px,4vw,36px);line-height:1.1;letter-spacing:-.025em;color:#135a70}
+    .stat span {display:block;font-size:13px;color:var(--muted);margin-top:9px;line-height:1.45}
+    section {background:var(--paper);padding:32px 38px;border:1px solid var(--line);border-radius:9px;margin-bottom:18px}
+    h2 {font-size:27px;letter-spacing:-.02em;line-height:1.3;margin:0 0 14px}
+    h3 {font-size:18px;margin:26px 0 5px}
+    p {margin:0 0 15px}
+    p:last-child {margin-bottom:0}
+    ul {margin:10px 0 0;padding-left:24px}
+    li {padding-bottom:7px}
+    .finding {padding:18px 0;border-top:1px solid var(--line)}
+    .finding:first-of-type {border-top:0}
+    .finding strong {color:#0b5e73}
+    .barline {display:flex;justify-content:space-between;gap:15px;font-size:14px;margin-top:18px}
+    .bar {height:16px;background:#e4edf1;border-radius:30px;overflow:hidden;margin-top:7px}
+    .bar span {display:block;height:100%;background:#27869a;width:38.64%}
+    .note {color:var(--muted);font-size:13px;margin-top:10px}
+    .taglist {display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .tag {font-size:13px;background:#eaf2f4;border:1px solid #d5e5e9;border-radius:30px;padding:4px 11px;color:#24546a}
+    footer {padding:25px 0 55px;color:var(--muted);font-size:14px}
+    footer a {margin-right:14px}
+    @media(max-width:680px) {.stats{grid-template-columns:1fr}.hero{padding:48px 0 58px}section{padding:25px 22px}.wrap{padding:0 18px}.navlinks{gap:13px}}
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"ScholarlyArticle",
+    "headline":"NYC Income Inequality by Census Block Group",
+    "description":"An exploratory Python analysis of household income and demographic indicators across 5,852 NYC census block groups.",
+    "author":{"@type":"Person","name":"Matthew Wiecha","alternateName":"Matt Wiecha","url":"https://www.matthewwiecha.com/"},
+    "url":"https://matthewwiecha.github.io/matthewwiecha1/",
+    "isAccessibleForFree":true,
+    "about":["New York City","Census block groups","Household income","Urban data analysis","Spatial inequality"]
+  }
+  </script>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <nav class="nav" aria-label="Primary navigation">
+        <a class="brand" href="https://www.matthewwiecha.com/">Matthew Wiecha</a>
+        <div class="navlinks">
+          <a href="#findings">Findings</a>
+          <a href="#methods">Methods</a>
+          <a href="#limitations">Limitations</a>
+          <a href="#author">About</a>
+        </div>
+      </nav>
+      <div class="hero">
+        <div class="eyebrow">Urban data analysis · New York City</div>
+        <h1>Exploring Income Inequality Across NYC Census Block Groups</h1>
+        <p class="lede">An exploratory analysis of household income, demographics, and neighborhood characteristics across 5,852 census block groups in New York City.</p>
+        <p class="byline">Research and analysis by <strong>Matthew (Matt) Wiecha</strong> · Python / pandas / Jupyter Notebook</p>
+        <div class="buttons">
+          <a class="button primary" href="https://github.com/matthewwiecha/matthewwiecha1/blob/main/Assignment2_MW.ipynb">View analysis notebook</a>
+          <a class="button" href="https://github.com/matthewwiecha/matthewwiecha1">GitHub repository</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="stats" aria-label="Research summary">
+      <div class="stat"><strong>5,852</strong><span>NYC census block groups represented in the dataset</span></div>
+      <div class="stat"><strong>$57,428</strong><span>Median of block-group median household incomes</span></div>
+      <div class="stat"><strong>2,261</strong><span>Block groups with median household income below $50,000</span></div>
+    </div>
+
+    <section id="overview">
+      <h2>Research overview</h2>
+      <p>How does household income vary across New York City, and what can neighborhood-level demographic data reveal about urban inequality? This project uses a dataset of 5,852 census block groups and 42 variables to explore differences in income, population, age, race, housing density, and access-related characteristics.</p>
+      <p>Rather than relying only on citywide averages, the analysis examines smaller geographic units. This approach makes it possible to identify concentrations of disadvantage and generate more specific questions about the distribution of resources and opportunities across the city.</p>
+      <p>The dataset identifies its period as <strong>2012–2016</strong>. Findings below describe this historical dataset, not present-day NYC income levels.</p>
+    </section>
+
+    <section id="findings">
+      <h2>Selected findings</h2>
+      <div class="finding">
+        <h3>Income varies substantially across block groups</h3>
+        <p>The mean block-group median household income is approximately <strong>$64,295</strong>, compared with a median of <strong>$57,428</strong>. The standard deviation is about <strong>$36,586</strong>. The income distribution is not normal, with a pronounced higher-income tail.</p>
+      </div>
+      <div class="finding">
+        <h3>More than a third of block groups fall below $50,000</h3>
+        <p><strong>2,261 of 5,852 block groups</strong> have a median household income below $50,000.</p>
+        <div class="barline"><span>Below $50,000</span><strong>38.6% of block groups</strong></div>
+        <div class="bar" role="img" aria-label="38.6 percent of block groups have median household income below $50,000"><span></span></div>
+        <p class="note">Share of geographic units, not share of residents or households.</p>
+      </div>
+      <div class="finding">
+        <h3>Income and demographic characteristics can be examined together</h3>
+        <p>For the 1,549 block groups where at least 40% of residents fall within the dataset's <code>PctBlackOnly</code> measure, the unweighted mean of block-group median household incomes is approximately <strong>$49,251</strong>. This is a descriptive subset statistic, not a causal finding or a measure of individual household incomes.</p>
+      </div>
+      <div class="finding">
+        <h3>Older populations and lower incomes overlap in some areas</h3>
+        <p>The notebook identifies <strong>67 block groups</strong> where more than 30% of residents are over age 65 and median household income is below $40,000. This intersection may help frame further questions about aging, accessibility, and service provision.</p>
+      </div>
+      <div class="finding">
+        <h3>High-income values extend into a long upper tail</h3>
+        <p>A borough-colored income histogram in the notebook suggests that Manhattan accounts for much of the upper-income tail, with Brooklyn also represented. This is a qualitative reading of the plotted distribution and would benefit from further borough-level analysis.</p>
+      </div>
+    </section>
+
+    <section id="methods">
+      <h2>Data and methods</h2>
+      <p>The project reads an NYC census block-group CSV into a pandas DataFrame and uses descriptive statistics, conditional filtering, and exploratory visualization to examine income and demographic patterns.</p>
+      <ul>
+        <li><strong>Data structure:</strong> 5,852 rows, each representing a census block group, with 42 variables.</li>
+        <li><strong>Python and pandas:</strong> Data loading, inspection, filtering, sums, and descriptive statistics.</li>
+        <li><strong>Matplotlib and Seaborn:</strong> A 50-bin household-income histogram colored by borough and a scatterplot of income against housing density, differentiated by waterfront status.</li>
+        <li><strong>Geographic context:</strong> Census block-group identifiers, coordinates, borough labels, and proximity indicators for parks are included in the source dataset.</li>
+      </ul>
+      <div class="taglist" aria-label="Tools and research topics">
+        <span class="tag">Python</span><span class="tag">pandas</span><span class="tag">Jupyter Notebook</span>
+        <span class="tag">Matplotlib</span><span class="tag">Seaborn</span><span class="tag">Descriptive statistics</span>
+        <span class="tag">Census block groups</span><span class="tag">Urban inequality</span>
+      </div>
+    </section>
+
+    <section id="limitations">
+      <h2>Interpretation and limitations</h2>
+      <p>This is an exploratory analysis of a historical dataset, not a comprehensive study of the causes of income inequality. Block-group medians should not be confused with individual or household incomes, and the mean of block-group medians is not the citywide median household income.</p>
+      <p>Likewise, the analysis identifies geographic and demographic associations but does not establish causal relationships. Although the dataset contains coordinates and other geographic indicators, the supplied notebook does not produce a geographic map; mapping and further statistical tests would be logical next steps.</p>
+      <p>The source CSV is referenced in the notebook by a local computer path. To make the project fully reproducible, the dataset would need to be supplied or replaced with a documented publicly available source.</p>
+    </section>
+
+    <section id="author">
+      <h2>About the researcher</h2>
+      <p><strong>Matthew (Matt) Wiecha</strong> is a Brooklyn-based urban planner with a Master of Urban Planning from Hunter College. His interests include transportation planning, GIS, public space, and quantitative approaches to understanding cities.</p>
+      <p>Explore more work at <a href="https://www.matthewwiecha.com/">matthewwiecha.com</a>, including <a href="https://matthewwiecha.github.io/nyc-citibike-station-analysis/">NYC Citi Bike station research</a>.</p>
+    </section>
+  </main>
+  <footer class="wrap">
+    <a href="https://www.matthewwiecha.com/">Personal website</a>
+    <a href="https://github.com/matthewwiecha">GitHub</a>
+    <a href="https://matthewwiecha.medium.com/">Writing</a>
+    <p>© 2026 Matthew Wiecha. Analysis based on the 2012–2016 dataset described in the notebook.</p>
+  </footer>
+</body>
+</html>
